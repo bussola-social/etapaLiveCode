@@ -12,6 +12,30 @@ services:
     networks:
       - api-laravel_network
 
+  frontend:
+      build:
+          context: ./frontend
+          dockerfile: Dockerfile
+          args:
+              USER_ID: ${USER_ID:-1000}
+      container_name: vue-frontend
+      ports:
+          - "5173:5173"
+      volumes:
+          - ./src:/app
+          - ./nginx/ssl:/nginx/ssl:ro
+          - ${SSH_DIR:-/home/.ssh}:/home/node/.ssh:rw
+      environment:
+          - GH_TOKEN=${GH_TOKEN:-}
+          - NODE_ENV=development
+      working_dir: /app
+      tty: true
+      restart: unless-stopped
+      networks:
+          - api-laravel_network
+      depends_on:
+          - php
+
   nginx:
     container_name: api-laravel_nginx
     build:
